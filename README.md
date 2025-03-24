@@ -1,12 +1,12 @@
-# Pertemuan 12 
-> Web Programming 2
+# Pertemuan 1
+> Web Programming 3
 <br>
 
 > [!NOTE]
-> Pertemuan 13 Persiapan presentasi project.
+> Pertemuan 1.
 
 > [!TIP]
-> Bila ada error tanyakan ke **[Chat GPT](https://chat.openai.com/).**
+> Bila ada error tanyakan ke **[Dosen].**
 
 > [!IMPORTANT]
 > Ini hanya untuk dokumentasi <ins>TUGAS</ins>
