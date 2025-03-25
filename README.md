@@ -6,7 +6,7 @@
 > Pertemuan 1.
 
 > [!TIP]
-> Bila ada error tanyakan ke **[Dosen].**
+>Baca **[Bismillah].**
 
 > [!IMPORTANT]
 > Ini hanya untuk dokumentasi <ins>TUGAS</ins>
