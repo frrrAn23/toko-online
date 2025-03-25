@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('image/icon_univ_bsi.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('frontend/image/icon_univ_bsi.png') }}">
     <title>Toko Online</title>
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="{{ asset('backend/assets/extra-libs/multicheck/multicheck.css') }}">
@@ -55,14 +55,14 @@
                         <b class="logo-icon p-l-10">
                             <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
                             <!-- Dark Logo icon -->
-                            <img src="{{ asset('image/icon_univ_bsi.png') }}"
+                            <img src="{{ asset('frontend/image/icon_univ_bsi.png') }}"
                                 alt="homepage" class="light-logo" />
                         </b>
                         <!--End Logo icon -->
                         <!-- Logo text -->
                         <span class="logo-text">
                             <!-- dark Logo text -->
-                            <img src="{{ asset('image/logo_text.png') }}" alt="homepage"
+                            <img src="{{ asset('frontend/image/logo_text.png') }}" alt="homepage"
                                 class="light-logo" />
                         </span>
                         <!-- Logo icon -->
