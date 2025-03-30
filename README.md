@@ -1,13 +1,15 @@
-# Pertemuan 1
+# Pertemuan 2
+
 > Web Programming 3
-<br>
+> <br>
 
 > [!NOTE]
-> Pertemuan 1.
+> Pertemuan 2 - selesai.
+>
+> > lanjut pertemuan 3
 
 > [!TIP]
->Baca **[Bismillah].**
+> Baca **[Bismillah].**
 
 > [!IMPORTANT]
 > Ini hanya untuk dokumentasi <ins>TUGAS</ins>
-
