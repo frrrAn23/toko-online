@@ -1,0 +1,3 @@
+# Agar Git tidak melacak file .env
+.env
+vendor/
