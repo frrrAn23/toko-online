@@ -4,10 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Customer extends Authenticatable
+class Customer extends  Authenticatable
 {
     use HasFactory, Notifiable;
 
@@ -15,18 +15,12 @@ class Customer extends Authenticatable
 
     protected $fillable = [
         'user_id',
-        'nama',
-        'email',
-        'status',
-        'role',
-        'password',
-        'hp',
-        'alamat',
-        'pos',
-        'foto',
         'google_id',
         'google_token',
+        'alamat',
+        'pos',
     ];
+    
 
     public function user() 
     { 

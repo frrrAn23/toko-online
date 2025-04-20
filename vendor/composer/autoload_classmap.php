@@ -2364,6 +2364,7 @@ return array(
     'Laravel\\Socialite\\Contracts\\Factory' => $vendorDir . '/laravel/socialite/src/Contracts/Factory.php',
     'Laravel\\Socialite\\Contracts\\Provider' => $vendorDir . '/laravel/socialite/src/Contracts/Provider.php',
     'Laravel\\Socialite\\Contracts\\User' => $vendorDir . '/laravel/socialite/src/Contracts/User.php',
+    'Laravel\\Socialite\\Exceptions\\DriverMissingConfigurationException' => $vendorDir . '/laravel/socialite/src/Exceptions/DriverMissingConfigurationException.php',
     'Laravel\\Socialite\\Facades\\Socialite' => $vendorDir . '/laravel/socialite/src/Facades/Socialite.php',
     'Laravel\\Socialite\\One\\AbstractProvider' => $vendorDir . '/laravel/socialite/src/One/AbstractProvider.php',
     'Laravel\\Socialite\\One\\MissingTemporaryCredentialsException' => $vendorDir . '/laravel/socialite/src/One/MissingTemporaryCredentialsException.php',
