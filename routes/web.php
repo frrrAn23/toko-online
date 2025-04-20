@@ -50,15 +50,19 @@ Route::post('backend/laporan/cetakuser', [UserController::class, 'cetakUser'])->
 Route::get('backend/laporan/formproduk', [ProdukController::class, 'formProduk'])->name('backend.laporan.formproduk')->middleware('auth');
 Route::post('backend/laporan/cetakproduk', [ProdukController::class, 'cetakProduk'])->name('backend.laporan.cetakproduk')->middleware('auth');
 
-Route::get('/produk/detail/{id}', [ProdukController::class, 'detail'])->name('produk.detail');
-Route::get('/produk/kategori/{id}', [ProdukController::class, 'produkKategori'])->name('produk.kategori');
-Route::get('/produk/all', [ProdukController::class, 'produkAll'])->name('produk.all');
+Route::middleware(['web'])->group(function () {
+    // Frontend 
+    Route::get('/beranda', [BerandaController::class, 'index'])->name('beranda'); 
+    Route::get('/produk/detail/{id}', [ProdukController::class, 'detail'])->name('produk.detail');
+    Route::get('/produk/kategori/{id}', [ProdukController::class, 'produkKategori'])->name('produk.kategori');
+    Route::get('/produk/all', [ProdukController::class, 'produkAll'])->name('produk.all');
+});
 
 //API Google
 Route::get('/auth/redirect', [CustomerController::class, 'redirect'])->name('auth.redirect');
 Route::get('/auth/google/callback', [CustomerController::class, 'callback'])->name('auth.callback');
 // Logout
-Route::post('/logout', [CustomerController::class, 'logout'])->name('logout');
+Route::post('/logout', [CustomerController::class, 'logout'])->name('customer.logout');
 
 // Route untuk Customer
 Route::resource('backend/customer', CustomerController::class, ['as' => 'backend'])->middleware('auth');
