@@ -66,3 +66,23 @@ Route::post('/logout', [CustomerController::class, 'logout'])->name('customer.lo
 
 // Route untuk Customer
 Route::resource('backend/customer', CustomerController::class, ['as' => 'backend'])->middleware('auth');
+
+// Route khusus customer (tambahkan ini sebelum atau setelah Route::resource)
+Route::middleware(['auth'])->group(function () {
+    // Detail Customer
+    Route::get('backend/customer/{id}', [CustomerController::class, 'show'])
+        ->name('backend.customer.show');
+    // Form Edit Customer
+    Route::get('backend/customer/{id}/edit', [CustomerController::class, 'edit'])
+        ->name('backend.customer.edit');
+    // Update Customer
+    Route::put('backend/customer/{id}', [CustomerController::class, 'update'])
+        ->name('backend.customer.update');
+    // Hapus Customer
+    Route::delete('backend/customer/{id}', [CustomerController::class, 'destroy'])
+        ->name('backend.customer.destroy');
+});
+
+// // Atau lebih baik, cukup gunakan Route::resource saja
+// Route::resource('backend/customer', CustomerController::class, ['as' => 'backend'])
+//     ->middleware('auth');

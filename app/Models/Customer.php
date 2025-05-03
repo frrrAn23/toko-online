@@ -19,6 +19,8 @@ class Customer extends  Authenticatable
         'google_token',
         'alamat',
         'pos',
+        'hp',
+        'foto',
     ];
     
 
