@@ -4,6 +4,13 @@ namespace App\Helpers;
 
 class ImageHelper
 {
+    public static function uploadCustomerPhoto($file)
+    {
+        $extension = $file->getClientOriginalExtension();
+        $filename = 'customer_'.time().'.'.$extension;
+        $path = $file->storeAs('public/img-customer', $filename);
+        return $filename;
+    }
     public static function uploadAndResize(
         $file,
         $directory,
