@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\OrderController;
 
 Route::get('/', function () {
     // return view('welcome');
@@ -57,6 +58,16 @@ Route::get('/auth/google/callback', [CustomerController::class, 'handleGoogleCal
 Route::middleware(['auth', 'is.customer'])->prefix('customer')->group(function () {
     Route::get('/akun/{id}', [CustomerController::class, 'akun'])->name('customer.akun');
     Route::put('/akun/{id}', [CustomerController::class, 'updateAkun'])->name('customer.akun.update');
+        // Route untuk menambahkan produk ke keranjang 
+        Route::post('add-to-cart/{id}', [OrderController::class, 'addToCart'])->name('order.addToCart'); 
+    
+        // Route untuk melihat isi keranjang
+        Route::get('cart', [OrderController::class, 'viewCart'])->name('order.cart'); 
+    
+        // Route untuk menghapus item dari keranjang
+        Route::delete('remove-from-cart/{id}', [OrderController::class, 'removeCartItem'])->name('order.removeCartItem');
+        // Route untuk mengupdate quantity item dalam keranjang
+        Route::put('update-cart-item/{id}', [OrderController::class, 'updateCartItem'])->name('order.updateCartItem');
 });
 
 // Logout Route
