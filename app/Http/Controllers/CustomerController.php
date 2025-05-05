@@ -6,228 +6,299 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Helpers\ImageHelper;
+use Laravel\Socialite\Facades\Socialite;
 
 class CustomerController extends Controller
 {
+    // ==================== ADMIN BACKEND METHODS ====================
+    
+    /**
+     * Menampilkan daftar customer
+     */
     public function index()
     {
-        $customer = Customer::orderBy('id', 'desc')->get();
+        $customers = Customer::with('user')
+            ->orderBy('id', 'desc')
+            ->get();
+            
         return view('backend.v_customer.index', [
-            'judul' => 'Customer',
-            'sub' => 'Halaman Customer',
-            'index' => $customer
+            'judul' => 'Manajemen Customer',
+            'sub' => 'Daftar Customer',
+            'customers' => $customers
         ]);
     }
 
+    /**
+     * Menampilkan detail customer
+     */
     public function show($id)
     {
         $customer = Customer::with('user')->findOrFail($id);
+        
         return view('backend.v_customer.show', [
             'judul' => 'Detail Customer',
-            'sub' => 'Halaman Detail Customer',
-            'show' => $customer
+            'sub' => 'Informasi Lengkap Customer',
+            'customer' => $customer
         ]);
     }
 
+    /**
+     * Menampilkan form tambah customer
+     */
     public function create()
     {
         return view('backend.v_customer.create', [
             'judul' => 'Tambah Customer',
-            'sub' => 'Halaman Tambah Customer'
+            'sub' => 'Form Registrasi Customer Baru'
         ]);
     }
 
+    /**
+     * Menyimpan data customer baru
+     */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|max:255',
-            'email' => 'required|max:255|email|unique:users',
-            'hp' => 'required|min:10|max:13',
+            'email' => 'required|email|unique:users,email',
+            'hp' => 'required|max:15',
             'alamat' => 'required',
-            'foto' => 'image|mimes:jpeg,jpg,png,gif|file|max:1024',
-        ], [
-            'foto.image' => 'Format gambar gunakan file dengan ekstensi jpeg, jpg, png, atau gif.',
-            'foto.max' => 'Ukuran file gambar Maksimal adalah 1024 KB.'
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:1024'
         ]);
 
         // Buat user baru
         $user = User::create([
-            'nama' => $validatedData['nama'],
-            'email' => $validatedData['email'],
-            'role' => '2', // Role customer
-            'status' => 1, // Status aktif
+            'nama' => $validated['nama'],
+            'email' => $validated['email'],
             'password' => Hash::make('password123'), // Password default
+            'role' => 'customer',
+            'status' => 1
         ]);
 
         // Handle upload foto
-        $fotoName = null;
-        if ($request->file('foto')) {
-            $file = $request->file('foto');
-            $extension = $file->getClientOriginalExtension();
-            $fotoName = date('YmdHis') . '_' . uniqid() . '.' . $extension;
-            $directory = 'storage/img-customer/';
-            ImageHelper::uploadAndResize($file, $directory, $fotoName, 385, 400);
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = ImageHelper::uploadCustomerPhoto($request->file('foto'));
         }
 
         // Buat data customer
         Customer::create([
             'user_id' => $user->id,
-            'hp' => $validatedData['hp'],
-            'alamat' => $validatedData['alamat'],
-            'foto' => $fotoName,
+            'hp' => $validated['hp'],
+            'alamat' => $validated['alamat'],
+            'foto' => $fotoPath
         ]);
 
-        return redirect()->route('backend.customer.index')->with('success', 'Data customer berhasil ditambahkan');
+        return redirect()->route('backend.customer.index')
+            ->with('success', 'Customer berhasil ditambahkan');
     }
 
+    /**
+     * Menampilkan form edit customer
+     */
     public function edit($id)
     {
         $customer = Customer::with('user')->findOrFail($id);
+        
         return view('backend.v_customer.edit', [
             'judul' => 'Edit Customer',
-            'sub' => 'Halaman Edit Customer',
-            'edit' => $customer
+            'sub' => 'Form Edit Data Customer',
+            'customer' => $customer
         ]);
     }
 
+    /**
+     * Update data customer
+     */
     public function update(Request $request, $id)
     {
         $customer = Customer::with('user')->findOrFail($id);
         
         $rules = [
             'nama' => 'required|max:255',
-            'hp' => 'required|min:10|max:13',
+            'hp' => 'required|max:15',
             'alamat' => 'required',
-            'foto' => 'image|mimes:jpeg,jpg,png,gif|file|max:1024',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:1024'
         ];
 
         if ($request->email != $customer->user->email) {
-            $rules['email'] = 'required|max:255|email|unique:users';
+            $rules['email'] = 'required|email|unique:users,email';
         }
 
-        $validatedData = $request->validate($rules, [
-            'foto.image' => 'Format gambar gunakan file dengan ekstensi jpeg, jpg, png, atau gif.',
-            'foto.max' => 'Ukuran file gambar Maksimal adalah 1024 KB.'
-        ]);
+        $validated = $request->validate($rules);
 
-        // Update data user
+        // Update user data
         $customer->user->update([
-            'nama' => $validatedData['nama'],
-            'email' => $request->email ?? $customer->user->email,
+            'nama' => $validated['nama'],
+            'email' => $request->email ?? $customer->user->email
         ]);
 
-        // Handle upload foto baru
-        if ($request->file('foto')) {
+        // Handle foto
+        $fotoPath = $customer->foto;
+        if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
-            if ($customer->foto) {
-                $oldImagePath = public_path('storage/img-customer/') . $customer->foto;
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
+            if ($fotoPath) {
+                Storage::delete('public/img-customer/'.$fotoPath);
             }
-
-            $file = $request->file('foto');
-            $extension = $file->getClientOriginalExtension();
-            $fotoName = date('YmdHis') . '_' . uniqid() . '.' . $extension;
-            $directory = 'storage/img-customer/';
-            ImageHelper::uploadAndResize($file, $directory, $fotoName, 385, 400);
-            $validatedData['foto'] = $fotoName;
+            $fotoPath = ImageHelper::uploadCustomerPhoto($request->file('foto'));
         }
 
-        // Update data customer
+        // Update customer data
         $customer->update([
-            'hp' => $validatedData['hp'],
-            'alamat' => $validatedData['alamat'],
-            'foto' => $validatedData['foto'] ?? $customer->foto,
+            'hp' => $validated['hp'],
+            'alamat' => $validated['alamat'],
+            'foto' => $fotoPath
         ]);
 
-        return redirect()->route('backend.customer.index')->with('success', 'Data customer berhasil diperbarui');
+        return redirect()->route('backend.customer.index')
+            ->with('success', 'Data customer berhasil diperbarui');
     }
 
+    /**
+     * Hapus data customer
+     */
     public function destroy($id)
     {
         $customer = Customer::with('user')->findOrFail($id);
         
         // Hapus foto jika ada
         if ($customer->foto) {
-            $oldImagePath = public_path('storage/img-customer/') . $customer->foto;
-            if (file_exists($oldImagePath)) {
-                unlink($oldImagePath);
-            }
+            Storage::delete('public/img-customer/'.$customer->foto);
         }
-
+        
         // Hapus user terkait
         $customer->user->delete();
         
         // Hapus customer
         $customer->delete();
 
-        return redirect()->route('backend.customer.index')->with('success', 'Data customer berhasil dihapus');
+        return redirect()->route('backend.customer.index')
+            ->with('success', 'Customer berhasil dihapus');
     }
 
-    // Fungsi untuk Google OAuth (tetap sama seperti sebelumnya)
-    public function redirect()
+    // ==================== FRONTEND CUSTOMER METHODS ====================
+    
+    /**
+     * Tampilkan halaman akun customer
+     */
+    public function akun($id)
+    {
+        // dd('masuk');
+         // Verifikasi bahwa user yang login sesuai dengan yang diakses
+    if (Auth::id() != $id) {
+        abort(403, 'Unauthorized action.');
+    }
+
+        $customer = Customer::with('user')
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+            
+        return view('v_customer.akun', [
+            'judul' => 'Akun Saya',
+            'sub' => 'Kelola Profil Anda',
+            'customer' => $customer
+        ]);
+    }
+
+    /**
+     * Update data akun customer
+     */
+    public function updateAkun(Request $request, $id)
+{
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'hp' => 'required|string|max:15',
+        'alamat' => 'required|string|max:255',
+        'pos' => 'required|string|max:10',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $user = User::findOrFail($id);
+    $user->nama = $request->input('nama');
+    $user->email = $request->input('email');
+    $user->hp = $request->input('hp');
+    $user->alamat = $request->input('alamat');
+    $user->pos = $request->input('pos');
+
+    // Handle foto upload
+    if ($request->hasFile('foto')) {
+        // Ambil file yang diupload
+        $foto = $request->file('foto');
+    
+        // Tentukan path untuk menyimpan foto
+        $fotoPath = $foto->store('img-customer', 'public');
+    
+        // Simpan path file ke dalam database
+        $user->foto = $fotoPath;
+    }
+    
+
+    $user->save();
+
+    return redirect()->route('customer.akun', ['id' => Auth::user()->id])->with('success', 'Akun berhasil diperbarui');
+}
+
+    // ==================== AUTHENTICATION METHODS ====================
+    
+    /**
+     * Redirect ke Google OAuth
+     */
+    public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
     }
 
-    public function callback()
+    /**
+     * Handle Google callback
+     */
+    public function handleGoogleCallback()
     {
         try {
-            $socialUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')->user();
+            
+            $user = User::firstOrCreate(
+                ['email' => $googleUser->getEmail()],
+                [
+                    'nama' => $googleUser->getName(),
+                    'password' => Hash::make(uniqid()),
+                    'role' => 'customer',
+                    'status' => 1
+                ]
+            );
 
-            // Cek apakah email sudah terdaftar 
-            $registeredUser = User::where('email', $socialUser->email)->first(); 
- 
-            if (!$registeredUser) { 
-                // Buat user baru 
-                $user = User::create([ 
-                    'nama' => $socialUser->name, 
-                    'email' => $socialUser->email, 
-                    'role' => '2', // Role customer 
-                    'status' => 1, // Status aktif 
-                    'password' => Hash::make('default_password'), // Password default (opsional) 
-                ]); 
- 
-                // Buat data customer 
-                Customer::create([ 
-                    'user_id' => $user->id, 
-                    'google_id' => $socialUser->id, 
-                    'google_token' => $socialUser->token,
-                    'hp' => null, // Atau nilai default
-                'alamat' => null // Jika diperlukan
-                ]); 
- 
-                // Login pengguna baru 
-                Auth::login($user); 
-            } else { 
-                // Jika email sudah terdaftar, langsung login 
-                Auth::login($registeredUser); 
-            } 
+            // Buat atau update data customer
+            Customer::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'google_id' => $googleUser->getId(),
+                    'hp' => null,
+                    'alamat' => null
+                ]
+            );
 
-            return redirect()->intended('beranda');
+            Auth::login($user);
+
+            return redirect()->intended('/beranda');
+
         } catch (\Exception $e) {
-            Log::error('Detail Error Google OAuth:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request' => request()->all()
-            ]);
-        
-            return redirect('/')
+            return redirect()->route('login')
                 ->with('error', 'Gagal login dengan Google: '.$e->getMessage());
         }
     }
 
+    /**
+     * Logout customer
+     */
     public function logout(Request $request)
     {
-        Auth::logout(); // Logout pengguna 
-        $request->session()->invalidate(); // Hapus session 
-        $request->session()->regenerateToken(); // Regenerate token CSRF 
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Anda telah berhasil logout.');
+        return redirect('/')->with('success', 'Anda telah logout');
     }
 }

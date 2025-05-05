@@ -1,7 +1,9 @@
 @extends('v_layouts.app')
 @section('content')
 <!-- template -->
-
+@if(Auth::check())
+    <p>Login sebagai: {{ Auth::user()->name }} | Role: {{ Auth::user()->role }}</p>
+@endif
 <!-- STORE -->
 <div id="store">
     <!-- row -->

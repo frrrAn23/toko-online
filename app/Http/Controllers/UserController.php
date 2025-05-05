@@ -95,6 +95,7 @@ class UserController extends Controller
             'role' => 'required',
             'status' => 'required',
             'hp' => 'required|min:10|max:13',
+            'alamat' => 'required|string|max:255', // tambah validasi alamat
             'foto' => 'image|mimes:jpeg,jpg,png,gif|file|max:1024',
         ];
         $messages = [
