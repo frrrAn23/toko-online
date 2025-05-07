@@ -95,8 +95,12 @@
 
                     <div class="col-md-12">
                         <br>
-                        <div class="pull-left">
+                        <div class="pull-right">
                             <button type="submit" class="primary-btn">Simpan Perubahan</button>
+                        </div>
+
+                        <div class="pull-left">
+                            <a href="{{ route('beranda') }}" class="primary-btn" style="margin-left: 10px;">Kembali ke Beranda</a>
                         </div>
                     </div>
                 </form>
