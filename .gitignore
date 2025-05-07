@@ -1,4 +1,4 @@
-# Agar Git tidak melacak file .env
+# Agar Git tidak melacak file .env dan yang lainnya
 /node_modules
 /vendor
 .env
