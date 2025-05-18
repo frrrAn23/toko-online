@@ -1,8 +1,7 @@
-
 > [!NOTE]
-> Pertemuan 5 - selesai.
+> Pertemuan 7 - selesai.
 >
-> > lanjut pertemuan 6
+> > lanjut pertemuan 9
 
 > [!TIP]
 > Baca **[Bismillah].**
