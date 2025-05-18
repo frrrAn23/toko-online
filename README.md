@@ -1,8 +1,3 @@
-# Pertemuan 7
-
-> Web Programming 3
-> <br>
-
 > [!NOTE]
 > Pertemuan 7 - selesai.
 >
