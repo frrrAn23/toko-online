@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\UserController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\RajaOngkirController;
 
 Route::get('/', function () {
     // return view('welcome');
@@ -72,3 +74,150 @@ Route::middleware(['auth', 'is.customer'])->prefix('customer')->group(function (
 
 // Logout Route
 Route::post('/logout', [CustomerController::class, 'logout'])->name('customer.logout');
+
+//Raja Ongkir
+// Route::get('/list-ongkir', function () {
+//     $response = Http::withHeaders([
+//         'key' => env('RAJAONGKIR_API_KEY')
+//     ])->get(env('RAJAONGKIR_BASE_URL').'/cost');
+
+//     dd($response->json());
+// });
+
+// Route::get('/list-ongkir', function () {
+//     $response = Http::withHeaders([
+//         'key' => env('RAJAONGKIR_API_KEY'),
+//     ])->get(env('RAJAONGKIR_BASE_URL') . '/cost/domestic-cost', [
+//         'search' => 'sinduharjo',
+//         'limit' => 5,
+//         'offset' => 0,
+//     ]);
+
+//     dd([
+//         'status' => $response->status(),
+//         'body' => $response->json(),
+//     ]);
+// });
+
+// Route::prefix('list-ongkir')->group(function () {
+    
+//     // GET /list-ongkir - Pencarian destination (endpoint yang terbukti bekerja)
+//     Route::get('/', function () {
+//         try {
+//             $response = Http::withHeaders([
+//                 'key' => env('RAJAONGKIR_API_KEY'),
+//             ])->get(env('RAJAONGKIR_BASE_URL') . '/destination/domestic-destination', [
+//                 'search' => request('search', 'sinduharjo'),
+//                 'limit' => request('limit', 5),
+//                 'offset' => request('offset', 0),
+//             ]);
+
+//             $data = $response->json();
+            
+//             if ($response->successful() && $data['meta']['status'] === 'success') {
+//                 return response()->json([
+//                     'status' => 200,
+//                     'message' => $data['meta']['message'],
+//                     'results' => $data['data']
+//                 ]);
+//             }
+
+//             return response()->json([
+//                 'status' => $data['meta']['code'] ?? 500,
+//                 'error' => $data['meta']['message'] ?? 'Unknown error'
+//             ], $data['meta']['code'] ?? 500);
+
+//         } catch (\Exception $e) {
+//             return response()->json([
+//                 'status' => 500,
+//                 'error' => 'Internal server error',
+//                 'message' => $e->getMessage()
+//             ], 500);
+//         }
+//     });
+
+//     // // GET /list-ongkir/provinces
+//     // Route::get('/provinces', function () {
+//     //     $response = Http::withHeaders([
+//     //         'key' => env('RAJAONGKIR_API_KEY')
+//     //     ])->get(env('RAJAONGKIR_BASE_URL').'/province');
+
+//     //     return response()->json([
+//     //         'status' => $response->status(),
+//     //         'data' => $response->json()
+//     //     ]);
+//     // });
+
+//     // // GET /list-ongkir/cities
+//     // Route::get('/cities', function () {
+//     //     $response = Http::withHeaders([
+//     //         'key' => env('RAJAONGKIR_API_KEY')
+//     //     ])->get(env('RAJAONGKIR_BASE_URL').'/city');
+
+//     //     return response()->json([
+//     //         'status' => $response->status(),
+//     //         'data' => $response->json()
+//     //     ]);
+//     // });
+
+//     // // GET /list-ongkir/calculate
+//     // Route::get('/calculate', function () {
+//     //     $response = Http::withHeaders([
+//     //         'key' => env('RAJAONGKIR_API_KEY'),
+//     //     ])->get(env('RAJAONGKIR_BASE_URL').'/cost/domestic-cost', [
+//     //         'origin' => request('origin'),
+//     //         'destination' => request('destination'),
+//     //         'weight' => request('weight'),
+//     //         'courier' => request('courier'),
+//     //     ]);
+
+//     //     return response()->json([
+//     //         'status' => $response->status(),
+//     //         'data' => $response->json()
+//     //     ]);
+//     // });
+
+//     // // GET /list-ongkir/search (alternatif pencarian)
+//     // Route::get('/search', function () {
+//     //     $response = Http::withHeaders([
+//     //         'key' => env('RAJAONGKIR_API_KEY'),
+//     //     ])->get(env('RAJAONGKIR_BASE_URL').'/cost/domestic-cost', [
+//     //         'search' => request('search', 'sinduharjo'),
+//     //         'limit' => request('limit', 5),
+//     //         'offset' => request('offset', 0),
+//     //     ]);
+
+//     //     return response()->json([
+//     //         'status' => $response->status(),
+//     //         'data' => $response->json()
+//     //     ]);
+//     // });
+// });
+
+// // Halaman utama cek ongkir
+// Route::get('/cek-ongkir', [RajaOngkirController::class, 'showForm']);
+// Route::get('/destinations', [RajaOngkirController::class, 'searchDestinations']);
+// Route::post('/calculate-cost', [RajaOngkirController::class, 'calculateCost']);
+
+Route::get('/cek-ongkir', function () { 
+    return view('ongkir'); 
+}); 
+ 
+Route::get('/location', [RajaOngkirController::class, 'getLocation']); //delivery
+Route::post('/cost', [RajaOngkirController::class, 'getCost']); //cost
+
+// Untuk debug atau testing list destination dengan search
+Route::get('/list-ongkir', function () {
+    $response = Http::withHeaders([
+        'key' => env('RAJAONGKIR_API_KEY_COST'),
+    ])->get(env('RAJAONGKIR_BASE_URL') . '/destination/domestic-destination', [
+        'search' => 'bekasi',
+        'limit' => 10,
+        'offset' => 0,
+    ]);
+
+    dd([
+        'status' => $response->status(),
+        'body' => $response->json(),
+    ]);
+});
